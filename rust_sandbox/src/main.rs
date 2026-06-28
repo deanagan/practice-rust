@@ -24,9 +24,11 @@ struct Order {
     quantity: u32,
 }   
 
+const MAX_LIMIT_ERROR : &str = "Quantity exceeds max limit.";
+
 fn validate_order(order: &Order) -> Result<(), String> {
     if order.quantity > 10_000 {
-        return Err(format!("Order {} rejected: Quantity exceeds max limit.", order.id));
+        return Err(format!("Order {} rejected: {}", order.id, MAX_LIMIT_ERROR));
     }
 
     if order.symbol.is_empty() {
@@ -57,7 +59,7 @@ fn main() {
         side: Side::Buy,
         price: dec!(1050.0), // This should trigger our fat-finger check
         order_type: OrderType::Limit,
-        quantity: 500,
+        quantity: 50_000,
     };
 
     println!("Validating order: {:?}", limit_order);
