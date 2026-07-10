@@ -8,14 +8,14 @@ mod domain;
 // 2. Bring the specific public items into our local namespace
 use domain::{Order, OrderType, Side, validate_order};
 
-fn main() {
+fn main() -> io::Result<()> {
     println!("--- Fintech Risk Engine Shell (Modular) ---");
     println!("Type an order price to validate it against 'limit_order'.");
     println!("Press 'q' at any time to exit.\n");
 
     loop {
         print!("risk-engine > ");
-        io::stdout().flush().unwrap();
+        io::stdout().flush()?;
 
         let mut input = String::new();
         io::stdin()
@@ -54,4 +54,6 @@ fn main() {
 
         println!(); 
     }
+    
+    Ok(())
 }
