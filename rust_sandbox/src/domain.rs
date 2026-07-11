@@ -27,6 +27,13 @@ pub struct Order {
 
 const MAX_LIMIT_ERROR: &str = "Quantity exceeds max limit.";
 
+/// Calculates total market value of the order: Price * Quantity
+pub fn calculate_value(order: &Order) -> Decimal {
+    // We convert the u32 quantity to a Decimal so we can multiply them safely
+    let qty_dec = Decimal::from(order.quantity);
+    order.price * qty_dec
+}
+
 pub fn validate_order(order: &Order) -> Result<(), String> {
     if order.quantity > 10_000 {
         return Err(format!("Order {} rejected: {}", order.id, MAX_LIMIT_ERROR));

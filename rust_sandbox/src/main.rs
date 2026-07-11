@@ -1,21 +1,27 @@
 // src/main.rs
 use std::io::{self, Write};
 use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
-// 1. Declare the module so the compiler links the file
+// Declare the module so the compiler links the file
 mod domain;
 
-// 2. Bring the specific public items into our local namespace
-use domain::{Order, OrderType, Side, validate_order};
+// Bring specific public items into our local namespace
+use domain::{Order, OrderType, Side, validate_order, calculate_value};
 
 fn main() -> io::Result<()> {
     println!("--- Fintech Risk Engine Shell (Modular) ---");
     println!("Type an order price to validate it against 'limit_order'.");
     println!("Press 'q' at any time to exit.\n");
 
+    // Initialize our persistent state variable on the stack
+    let mut running_buy_volume = dec!(0.0);
+
     loop {
+        // Display the current cumulative value at the top of every loop turn
+        println!("[Session Buy Volume: ${}]", running_buy_volume);
         print!("risk-engine > ");
-        io::stdout().flush()?;
+        io::stdout().flush()?; // Safely bubbles up any terminal IO error using ?
 
         let mut input = String::new();
         io::stdin()
@@ -43,7 +49,17 @@ fn main() -> io::Result<()> {
 
                 // Execute the imported validation module function
                 match validate_order(&interactive_order) {
-                    Ok(()) => println!("Success: Order {} passed risk validation.", interactive_order.id),
+                    Ok(()) => {
+                        let order_value = calculate_value(&interactive_order);
+                        running_buy_volume += order_value;
+
+                        // 1. STEAL OWNERSHIP: This moves 'interactive_order' into a new variable name.
+                        // Because Order contains a String (symbol), Rust deletes the original reference.
+                        let moved_order = interactive_order; 
+
+                        // 2. THE ILLEGAL READ: We try to read the original variable AFTER it was moved.
+                        println!("Success: Order {} passed risk validation.", interactive_order.id);
+                    }
                     Err(error_msg) => println!("Risk Alert -> {}", error_msg),
                 }
             }
