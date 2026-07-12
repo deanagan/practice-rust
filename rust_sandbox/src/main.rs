@@ -55,10 +55,10 @@ fn main() -> io::Result<()> {
 
                         // 1. STEAL OWNERSHIP: This moves 'interactive_order' into a new variable name.
                         // Because Order contains a String (symbol), Rust deletes the original reference.
-                        let moved_order = interactive_order; 
+                        let order_reference = &interactive_order; 
 
-                        // 2. THE ILLEGAL READ: We try to read the original variable AFTER it was moved.
-                        println!("Success: Order {} passed risk validation.", interactive_order.id);
+                        // 2. THE LEGAL READ: We try to read the original variable AFTER it was moved.
+                        println!("Success: Order {} passed risk validation.", order_reference.id);
                     }
                     Err(error_msg) => println!("Risk Alert -> {}", error_msg),
                 }
